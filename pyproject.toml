@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nonebot-plugin-anti-recall-repeat"
+version = "0.1.0"
+description = "A minimal NoneBot2 + OneBot v11 QQ group moderation plugin for anti-recall cache and anti-repeat reminder."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+  { name = "nonebot-plugin-anti-recall-repeat contributors" }
+]
+dependencies = [
+  "nonebot2[fastapi]>=2.2.0",
+  "nonebot-adapter-onebot>=2.4.0"
+]
+
+[project.entry-points.nb]
+nonebot_plugin_anti_recall_repeat = "nonebot_plugin_anti_recall_repeat"
+
+[tool.setuptools.packages.find]
+include = ["nonebot_plugin_anti_recall_repeat*"]
+
+[tool.nonebot]
+adapters = [
+  { name = "OneBot V11", module_name = "nonebot.adapters.onebot.v11" }
+]
+plugins = ["nonebot_plugin_anti_recall_repeat"]
+plugin_dirs = []
+builtin_plugins = []
