@@ -1,3 +1,5 @@
+import random
+
 from nonebot import get_driver, logger
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent
 
@@ -15,15 +17,37 @@ def is_group_enabled(group_id: int) -> bool:
     return not enabled_groups or group_id in enabled_groups
 
 
+# 判断用户是否是超级用户。
+def is_superuser(user_id: int) -> bool:
+    superusers = {str(user) for user in get_driver().config.superusers}
+    return str(user_id) in superusers
+
+
 # 判断用户是否是超级用户或白名单用户。
 def is_superuser_or_whitelist(user_id: int) -> bool:
-    superusers = {str(user) for user in get_driver().config.superusers}
-    return str(user_id) in superusers or user_id in plugin_config.anti_recall_repeat_whitelist_users
+    return is_superuser(user_id) or user_id in plugin_config.anti_recall_repeat_whitelist_users
+
+
+# 生成随机禁言时长，默认范围是 1 到 10 分钟。
+def get_random_ban_duration() -> int:
+    min_seconds = max(plugin_config.anti_recall_repeat_ban_min_seconds, 0)
+    max_seconds = max(plugin_config.anti_recall_repeat_ban_max_seconds, 0)
+
+    if max_seconds <= 0:
+        return 0
+    if min_seconds > max_seconds:
+        min_seconds, max_seconds = max_seconds, min_seconds
+    if min_seconds == max_seconds:
+        return min_seconds
+
+    return random.randint(min_seconds, max_seconds)
 
 
 # 判断群消息发送者是否需要跳过处理。
 def should_skip_group_message(event: GroupMessageEvent) -> bool:
     if not is_plugin_enabled():
+        return True
+    if str(event.user_id) == str(event.self_id):
         return True
     if not is_group_enabled(event.group_id):
         return True
