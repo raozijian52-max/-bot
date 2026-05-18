@@ -4,6 +4,7 @@
 
 - 防撤回：监听群消息和群撤回事件，缓存群消息；撤回时随机禁言并复述撤回内容，超级用户除外。
 - 防复读：连续两条纯文本完全相同时，随机禁言并发送提醒。
+- AI 聊天：群内发送 `/ai 问题` 时调用 OpenAI-compatible Chat Completions API 回复。
 - 管理员、群主、超级用户、白名单用户会跳过处理。
 - 不写死群号和 QQ 号，全部通过 `.env` / NoneBot 配置管理。
 
@@ -20,7 +21,8 @@
     ├── config.py
     ├── utils.py
     ├── anti_recall.py
-    └── anti_repeat.py
+    ├── anti_repeat.py
+    └── ai_chat.py
 ```
 
 ## 安装依赖
@@ -56,6 +58,14 @@ ANTI_RECALL_REPEAT_BAN_MIN_SECONDS=60
 ANTI_RECALL_REPEAT_BAN_MAX_SECONDS=600
 ANTI_RECALL_REPEAT_RECALL_TIP="检测到撤回，已禁言 {user_id} {duration} 秒。撤回内容：{message}"
 ANTI_RECALL_REPEAT_REPEAT_TIP="检测到复读，已禁言 {user_id} {duration} 秒。"
+
+ANTI_RECALL_REPEAT_AI_ENABLED=false
+ANTI_RECALL_REPEAT_AI_API_KEY=""
+ANTI_RECALL_REPEAT_AI_API_BASE="https://api.deepseek.com"
+ANTI_RECALL_REPEAT_AI_MODEL="deepseek-chat"
+ANTI_RECALL_REPEAT_AI_TRIGGER="/ai"
+ANTI_RECALL_REPEAT_AI_TIMEOUT=30.0
+ANTI_RECALL_REPEAT_AI_MAX_TOKENS=800
 ```
 
 说明：
@@ -68,6 +78,13 @@ ANTI_RECALL_REPEAT_REPEAT_TIP="检测到复读，已禁言 {user_id} {duration} 
 - `ANTI_RECALL_REPEAT_BAN_MAX_SECONDS`：随机禁言最长秒数，默认 `600`。
 - `ANTI_RECALL_REPEAT_RECALL_TIP`：复述撤回内容的提示模板，可使用 `{group_id}`、`{user_id}`、`{operator_id}`、`{duration}`、`{message}`、`{raw_message}`。
 - `ANTI_RECALL_REPEAT_REPEAT_TIP`：检测到连续复读时发送的提醒，可使用 `{group_id}`、`{user_id}`、`{duration}`。
+- `ANTI_RECALL_REPEAT_AI_ENABLED`：AI 聊天开关。
+- `ANTI_RECALL_REPEAT_AI_API_KEY`：大模型 API Key。
+- `ANTI_RECALL_REPEAT_AI_API_BASE`：OpenAI-compatible API 地址。
+- `ANTI_RECALL_REPEAT_AI_MODEL`：模型名称。
+- `ANTI_RECALL_REPEAT_AI_TRIGGER`：AI 命令触发前缀。
+- `ANTI_RECALL_REPEAT_AI_TIMEOUT`：AI 请求超时时间。
+- `ANTI_RECALL_REPEAT_AI_MAX_TOKENS`：AI 回答最大 token 数。
 
 ## 当前行为
 
@@ -82,3 +99,13 @@ ANTI_RECALL_REPEAT_REPEAT_TIP="检测到复读，已禁言 {user_id} {duration} 
 ### 防复读
 
 插件只处理纯文本消息。如果同一个群里连续两条纯文本内容完全相同，会随机禁言当前复读用户 1 到 10 分钟，并发送一次提醒。
+
+### AI 聊天
+
+启用 AI 并配置 API Key 后，在群里发送：
+
+```text
+/ai 你好，介绍一下你自己
+```
+
+机器人会先发送“正在思考中……”，然后把模型回答发回群里。当前不做全群自动回复、长期上下文、复杂人格或图片识别。

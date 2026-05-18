@@ -13,3 +13,4 @@ __plugin_meta__ = PluginMetadata(
 
 from . import anti_recall as anti_recall
 from . import anti_repeat as anti_repeat
+from . import ai_chat as ai_chat

@@ -17,6 +17,13 @@ class Config(BaseModel):
     anti_recall_repeat_repeat_tip: str = Field(
         default="检测到复读，已禁言 {user_id} {duration} 秒。"
     )
+    anti_recall_repeat_ai_enabled: bool = Field(default=False)
+    anti_recall_repeat_ai_api_key: str = Field(default="")
+    anti_recall_repeat_ai_api_base: str = Field(default="https://api.deepseek.com")
+    anti_recall_repeat_ai_model: str = Field(default="deepseek-chat")
+    anti_recall_repeat_ai_trigger: str = Field(default="/ai")
+    anti_recall_repeat_ai_timeout: float = Field(default=30.0)
+    anti_recall_repeat_ai_max_tokens: int = Field(default=800)
 
 
 plugin_config = get_plugin_config(Config)
